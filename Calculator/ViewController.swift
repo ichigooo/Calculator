@@ -11,11 +11,14 @@ import UIKit
 class ViewController: UIViewController {
 
     var isNum = false
-    var prev = 0
-    var next = 0
+    var prev = 0.0
+    var next = 0.0
+    var result = 0.0
     var operation = ""
     var isNeg = false
     var decimal = false
+    var new_number = true
+    var pressed = false
     
     @IBOutlet weak var numberDisplayLabel: UILabel!
     override func viewDidLoad() {
@@ -24,20 +27,81 @@ class ViewController: UIViewController {
         numberDisplayLabel.text = "0"
     }
     
-    @IBAction func clearDisplay(sender: AnyObject) {
+    @IBAction func clearDisplay(sender: UIButton) {
         numberDisplayLabel.text = "0"
+        prev = 0.0
+        next = 0.0
+        result = 0.0
+        new_number = true
         decimal = false
+        isNeg = false
+        pressed = false
     }
     @IBAction func operationButtonPressed(sender: UIButton) {
-        decimal = false
+        
+        pressed = false
+        print (operation)
+        if (prev != 0.0) {
+            print("prev != 0.0")
+            if(operation == "÷"){
+                result = Double(prev)/Double(numberDisplayLabel.text!)!
+            } else if(operation == "x") {
+                print (prev)
+                result = (Double(numberDisplayLabel.text!)!*Double(prev))
+            } else if(operation == "+") {
+                result = (Double(numberDisplayLabel.text!)!+Double(prev))
+            } else {
+                result = Double(prev) - Double(numberDisplayLabel.text!)!
+                print ("test minus:" , result)
+            }
+            let display = NSString(format: "%.6f", result)
+            numberDisplayLabel.text = display as String
+        }
+        prev = Double(numberDisplayLabel.text!)!
+        operation = sender.titleLabel!.text!
+        do_operation(operation)
+        
+        
+    }
+    
+    @IBAction func equalButtonPressed(sender: UIButton) {
+        
+        new_number = true
+        if (pressed) {
+            prev = Double(numberDisplayLabel.text!)!
+        } else {
+            
+            //first time pressing
+            next = Double(numberDisplayLabel.text!)!
+            pressed = true
+        }
+        if(operation == "÷"){
+            result = Double(prev)/next
+        } else if(operation == "x") {
+            result = next*Double(prev)
+        } else if(operation == "+") {
+            result = next+Double(prev)
+        } else {
+            result = Double(prev) - next
+        }
+        let display = NSString(format: "%.6f", result)
+        print ("test precision: ", display)
+        numberDisplayLabel.text = display as String
+        print ("test previous:", prev, ", next: ", next, "pressed: ", pressed)
+        
+
+    }
+    @IBAction func percentButtonPressed(sender: UIButton) {
         
     }
     @IBAction func numberButtonPressed(sender: UIButton) {
-        print("\(sender)")
         
         
         let value = sender.titleLabel!.text!
-        
+        if (new_number == true) {
+            numberDisplayLabel.text = "0"
+        }
+        new_number = false
         //to check if the neg/pos sign apply
         if value == "+/-" {
             if (numberDisplayLabel.text!) != "0" {
@@ -65,17 +129,14 @@ class ViewController: UIViewController {
             }
         }
         
+        
         //if the input exceed maximum, stop
         if numberDisplayLabel.text!.characters.count >= 8 {
             return
         }
         
-        //get the current display
-        let valueDouble = Double(numberDisplayLabel.text!) ?? 0.0
-        print(valueDouble)
-        
         //append the button value to display
-        if (numberDisplayLabel.text!) == "0" {
+        if (numberDisplayLabel.text!) == "0.0" || (numberDisplayLabel.text!) == "0" {
             numberDisplayLabel.text! = value
         } else {
             numberDisplayLabel.text! += value
@@ -83,10 +144,25 @@ class ViewController: UIViewController {
         
         
     }
+    
+    
+    //helper functions for operations
+    func do_operation(operation_name: String) {
+        decimal = false
+        new_number = true
+        operation = operation_name
+        
+        print ("do_operation test: ", prev)
+        
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+        
         // Dispose of any resources that can be recreated.
+        
+        
     }
 
 

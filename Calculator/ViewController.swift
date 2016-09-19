@@ -32,41 +32,50 @@ class ViewController: UIViewController {
         prev = 0.0
         next = 0.0
         result = 0.0
+        operation = ""
         new_number = true
         decimal = false
         isNeg = false
         pressed = false
     }
     @IBAction func operationButtonPressed(sender: UIButton) {
-        
+        print ("test operation")
         pressed = false
-        print (operation)
+
         if (prev != 0.0) {
-            print("prev != 0.0")
             if(operation == "÷"){
                 result = Double(prev)/Double(numberDisplayLabel.text!)!
             } else if(operation == "x") {
-                print (prev)
                 result = (Double(numberDisplayLabel.text!)!*Double(prev))
             } else if(operation == "+") {
                 result = (Double(numberDisplayLabel.text!)!+Double(prev))
             } else {
                 result = Double(prev) - Double(numberDisplayLabel.text!)!
-                print ("test minus:" , result)
             }
-            let display = NSString(format: "%.6f", result)
-            numberDisplayLabel.text = display as String
+            var on_display = String(format: "%g", result)
+            if String(result).characters.count >= 8 {
+                let index = (String(result)).startIndex.advancedBy(8)
+                on_display = (String(result)).substringToIndex(index)
+            }
+            numberDisplayLabel.text = on_display
         }
         prev = Double(numberDisplayLabel.text!)!
+        isNeg = false
         operation = sender.titleLabel!.text!
         do_operation(operation)
+        
         
         
     }
     
     @IBAction func equalButtonPressed(sender: UIButton) {
-        
+        if (operation == "") {
+            return
+        }
+        isNeg = false
         new_number = true
+        print ("test")
+        
         if (pressed) {
             prev = Double(numberDisplayLabel.text!)!
         } else {
@@ -84,18 +93,30 @@ class ViewController: UIViewController {
         } else {
             result = Double(prev) - next
         }
-        let display = NSString(format: "%.6f", result)
-        print ("test precision: ", display)
-        numberDisplayLabel.text = display as String
-        print ("test previous:", prev, ", next: ", next, "pressed: ", pressed)
-        
+//        let display = NSString(format: "%.6f", result)
+//        print ("test precision: ", display)
+//        numberDisplayLabel.text = display as String
+        var on_display = String(format: "%g", result)
+        if String(result).characters.count >= 8 {
+            let index = (String(result)).startIndex.advancedBy(8)
+            on_display = (String(result)).substringToIndex(index)
+        }
+        print ("test here", on_display)
+        numberDisplayLabel.text = on_display
 
     }
     @IBAction func percentButtonPressed(sender: UIButton) {
+        var on_display = numberDisplayLabel.text!
+        on_display = String(Double(on_display)!*0.01)
+        if on_display.characters.count >= 8 {
+            let index = on_display.startIndex.advancedBy(8)
+            on_display = on_display.substringToIndex(index)
+        }
+        numberDisplayLabel.text = on_display
         
     }
     @IBAction func numberButtonPressed(sender: UIButton) {
-        
+        print ("test number")
         
         let value = sender.titleLabel!.text!
         if (new_number == true) {
@@ -103,17 +124,21 @@ class ViewController: UIViewController {
         }
         new_number = false
         //to check if the neg/pos sign apply
+        
         if value == "+/-" {
-            if (numberDisplayLabel.text!) != "0" {
-                if isNeg == true {
-                    isNeg = false
-                    let index = (numberDisplayLabel.text!).startIndex.advancedBy(1)
-                    numberDisplayLabel.text! = (numberDisplayLabel.text!).substringFromIndex(index)
-                } else {
-                    isNeg = true
+            
+            if isNeg == true {
+                isNeg = false
+                let index = (numberDisplayLabel.text!).startIndex.advancedBy(1)
+                numberDisplayLabel.text! = (numberDisplayLabel.text!).substringFromIndex(index)
+            } else {
+                isNeg = true
+                if (numberDisplayLabel.text!) != "0.0" && (numberDisplayLabel.text!) != "0" {
                     numberDisplayLabel.text! = "-" + numberDisplayLabel.text!
                 }
+                
             }
+            
             return
         }
         
@@ -138,6 +163,8 @@ class ViewController: UIViewController {
         //append the button value to display
         if (numberDisplayLabel.text!) == "0.0" || (numberDisplayLabel.text!) == "0" {
             numberDisplayLabel.text! = value
+        } else if (numberDisplayLabel.text!) == "-0"{
+            numberDisplayLabel.text! = "-" + value
         } else {
             numberDisplayLabel.text! += value
         }
@@ -151,8 +178,6 @@ class ViewController: UIViewController {
         decimal = false
         new_number = true
         operation = operation_name
-        
-        print ("do_operation test: ", prev)
         
     }
 
